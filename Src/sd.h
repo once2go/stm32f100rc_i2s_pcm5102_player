@@ -49,5 +49,7 @@ uint8_t sd_init();
 void SPI_Release(void);
 uint8_t SD_cmd(uint8_t cmd, uint32_t arg);
 uint8_t SPI_ReceiveByte(void);
+uint8_t SD_Read_Block(uint8_t *buff, uint32_t lba);
+uint8_t SD_Write_Block(uint8_t *buff, uint32_t lba);
 
 #endif /* SD_H_ */

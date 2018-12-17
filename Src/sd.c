@@ -14,8 +14,62 @@ extern volatile uint16_t Timer1;
 sd_info_ptr sdinfo;
 char str1[60] = { 0 };
 
+uint8_t SD_Read_Block(uint8_t *buff, uint32_t lba) {
+	uint8_t result;
+	uint16_t cnt;
+	result = SD_cmd(CMD17, lba);
+	if (result != 0x00) {
+		return 5;
+	}
+	SPI_Release();
+	do { // waiting when block begin
+		result = SPI_ReceiveByte();
+		cnt++;
+
+	} while ((result != 0xFE) && (cnt < 0xFFFF));
+	if (cnt >= 0xFFFF) {
+		return 5;
+	}
+	for (cnt = 0; cnt < 512; cnt++) {
+		buff[cnt] = SPI_ReceiveByte(); //Set buss data to buffer
+	}
+	SPI_Release(); //Skip checksum
+	SPI_Release();
+	return 0;
+}
+
+uint8_t SD_Write_Block(uint8_t *buff, uint32_t lba) {
+	uint8_t result;
+	uint16_t cnt;
+	result = SD_cmd(CMD24, lba); //CMD24 datasheet pg. 51 & 97-98
+	if (result != 0x00) {
+		return 6; //return if result not 0x00
+	}
+	SPI_Release();
+	SPI_SendByte(0xFE); //Start buffer
+	for (cnt = 0; cnt < 512; cnt++) {
+		SPI_SendByte(buff[cnt]); //DATA
+	}
+	SPI_Release(); //Skip checksum
+	SPI_Release();
+	result = SPI_ReceiveByte();
+	if ((result & 0x05) != 0x05) {
+		return 6; //return if result not 0x05 (datasheet pg 111)
+	}
+	cnt = 0;
+	do { //Wait until BUSY state end
+		result = SPI_ReceiveByte();
+		cnt++;
+	} while ((result != 0xFF) && (cnt < 0xFFFF));
+	if (cnt >= 0xFFFF) {
+		return 6;
+	}
+	return 0;
+
+}
+
 uint8_t sd_init() {
-	uint8_t cmd;
+	uint8_t cmd, i;
 	uint16_t tmr;
 	uint8_t ocr[4];
 	HAL_Delay(100);
@@ -29,7 +83,7 @@ uint8_t sd_init() {
 	if (SD_cmd(CMD0, 0) == 1) { // Enter Idle state
 		SPI_Release();
 		if (SD_cmd(CMD8, 0x1AA) == 1) { // SDv2
-			for (int i = 0; i < 4; i++) {
+			for (i = 0; i < 4; i++) {
 				ocr[i] = SPI_ReceiveByte();
 			}
 			sprintf(str1, "OCR: 0x%02X 0x%02X 0x%02X 0x%02Xrn", ocr[0], ocr[1],
@@ -39,8 +93,8 @@ uint8_t sd_init() {
 				for (tmr = 12000; tmr && SD_cmd(ACMD41, 1UL << 30); tmr--)
 					; // Wait for leaving idle state (ACMD41 with HCS bit)
 				if (tmr && SD_cmd(CMD58, 0) == 0) { // Check CCS bit in the OCR
-					for (int j = 0; j < 4; j++) {
-						ocr[j] = SPI_ReceiveByte();
+					for ( i = 0; i < 4; i++) {
+						ocr[i] = SPI_ReceiveByte();
 					}
 					sprintf(str1, "OCR: 0x%02X 0x%02X 0x%02X 0x%02Xrn", ocr[0],
 							ocr[1], ocr[2], ocr[3]);

@@ -32,7 +32,8 @@ Src/user_diskio.o: ../Src/user_diskio.c \
  /home/once2go/Ac6/workspace/SD_FATFS/Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_spi_ex.h \
  /home/once2go/Ac6/workspace/SD_FATFS/Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_tim.h \
  /home/once2go/Ac6/workspace/SD_FATFS/Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_tim_ex.h \
- /home/once2go/Ac6/workspace/SD_FATFS/Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_uart.h
+ /home/once2go/Ac6/workspace/SD_FATFS/Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_uart.h \
+ ../Src/sd.h
 
 /home/once2go/Ac6/workspace/SD_FATFS/Middlewares/Third_Party/FatFs/src/ff_gen_drv.h:
 
@@ -101,3 +102,5 @@ Src/user_diskio.o: ../Src/user_diskio.c \
 /home/once2go/Ac6/workspace/SD_FATFS/Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_tim_ex.h:
 
 /home/once2go/Ac6/workspace/SD_FATFS/Drivers/STM32L1xx_HAL_Driver/Inc/stm32l1xx_hal_uart.h:
+
+../Src/sd.h:
